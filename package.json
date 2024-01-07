@@ -1,0 +1,34 @@
+{
+  "name": "lab1_node",
+  "version": "1.0.0",
+  "description": "lab 1 ",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "npx prettier . --check",
+    "format:fix": "npx prettier . --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sirfromfrance/lab1_Node.git"
+  },
+  "author": "Valeriia Hrytsenko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sirfromfrance/lab1_Node/issues"
+  },
+  "homepage": "https://github.com/sirfromfrance/lab1_Node#readme",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-semistandard": "^17.0.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-sonarjs": "^0.23.0",
+    "prettier": "3.1.1"
+  }
+}
