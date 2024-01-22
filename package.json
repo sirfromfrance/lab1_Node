@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "format": "npx prettier . --check",
     "format:fix": "npx prettier . --write",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build": "npm install --force"
   },
   "repository": {
     "type": "git",
