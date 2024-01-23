@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "format": "npx prettier . --check",
     "format:fix": "npx prettier . --write",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build": "npm install --force"
   },
   "repository": {
     "type": "git",
@@ -23,11 +24,12 @@
   },
   "homepage": "https://github.com/sirfromfrance/lab1_Node#readme",
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.0",
     "eslint": "^8.56.0",
-    "eslint-config-semistandard": "^17.0.0",
+    "eslint-config-semistandard": "^15.0.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.1",
+    "eslint-plugin-n": "^16.6.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-sonarjs": "^0.23.0",
     "husky": "^8.0.3",
