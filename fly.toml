@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for lab1-node-late-pond-2247-red-grass-437 on 2024-01-23T18:16:08+02:00
+# fly.toml app configuration file generated for lab1-node-late-pond-2247-red-grass-437-wispy-tree-1066-fragrant-fog-6020-quiet-sunset-2852-green-glade-2216-cool-rain-1141-still-waterfall-298 on 2024-01-24T22:39:39+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "lab1-node-late-pond-2247-red-grass-437"
+app = "lab1-node-late-pond-2247-red-grass-437-wispy-tree-1066-fragrant-fog-6020-quiet-sunset-2852-green-glade-2216-cool-rain-1141-still-waterfall-298"
 primary_region = "waw"
 
 [build]
