@@ -1,90 +1,87 @@
-"use strict";
+import http from "http";
+import net from "net";
 
-import * as http from "node:http";
-import * as net from "node:net";
+const proxy = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain", "Proxy-agent": "NodeJS" });
+  res.end(`received a request ${req.url}`);
+});
 
-const CRLF = "\r\n";
-const PORT = 8080;
-const DEFAULT_HTTP_PORT = 80;
+proxy.on("request", (req, res) => {
+  // Parse the requested URL
 
-const receiveBody = async (stream) => {
-  const chunks = [];
-  for await (const chunk of stream) chunks.push(chunk);
+  const url = new URL(req.url);
+  const options = {
+    hostname: url.hostname,
+    port: url.port,
+    path: url.pathname,
+    method: req.method,
+    headers: req.headers,
+  };
 
-  return Buffer.concat(chunks);
-};
+  console.log(`Sending request to ${url.href}`);
+  // Create a request to the target server
+  const serverReq = http.request(options, (serverRes) => {
+    console.log(`Received response from ${url.href}`);
 
-const server = http.createServer(async (req, res) => {
-  console.log("\nRequest received (HTTP)");
+    // Write the response headers
+    res.writeHead(serverRes.statusCode, serverRes.headers);
 
-  const { remoteAddress, remotePort } = req.socket;
+    // Pipe the server response to the client response
+    serverRes.pipe(res);
+  });
 
-  console.log(`Connection from ${remoteAddress}:${remotePort} to ${req.url}`);
+  // Pipe the client request to the server request
+  req.pipe(serverReq);
 
-  const { headers, url, method } = req;
-  const { pathname, hostname } = new URL(url.substring(1)); //REMOVE '/';
-  const options = new URL(url.substring(1));
-  options.method = method;
-  options.headers = headers;
-  options.headers.host = hostname; // Set the Host header
-  // const options = { hostname, path: pathname, method, headers, };
-  const request = http.request(options, (result) => void result.pipe(res));
+  // Handle errors
+  serverReq.on("error", (err) => {
+    console.error(`Error occurred on server request: ${err.message}`);
+    res.writeHead(500);
+    res.end(`Error occurred: ${err.message}`);
+  });
 
-  if (method !== "GET" && method !== "HEAD") {
-    const body = await receiveBody(req);
-    request.write(body);
+  serverReq.on("uncaughtException", (err) => {
+    console.error("There was an uncaught error", err);
+    process.exit(1); //mandatory (as per the Node.js docs)
+  });
+});
+
+proxy.on("connect", (req, clientSocket, head) => {
+  // Check if the URL is empty
+  if (!req.url || req.url === "/") {
+    clientSocket.write(
+      "HTTP/1.1 400 Bad Request\r\n" +
+        "Proxy-agent: Node.js-Proxy\r\n" +
+        "\r\n",
+    );
+    clientSocket.end();
+    return;
   }
 
-  request.end();
-});
-
-server.on("connect", (req, socket, head) => {
-  console.log("\nRequest received (HTTPS)");
-
-  socket.write("HTTP/1.1 200 Connection Established" + CRLF + CRLF);
-
-  const { remoteAddress, remotePort } = socket;
-
-  const { hostname, port } = new URL(`http://${req.url}`);
-
-  const targetPort = parseInt(port, 10) || DEFAULT_HTTP_PORT;
-
-  const proxy = net.connect(targetPort, hostname, () => {
-    if (head) proxy.write(head);
-    socket.pipe(proxy).pipe(socket);
+  // Connect to an origin server
+  const { port, hostname } = new URL(`http://${req.url}`);
+  const serverSocket = net.connect(port || 80, hostname, () => {
+    clientSocket.write(
+      "HTTP/1.1 200 Connection Established\r\n" +
+        "Proxy-agent: Node.js-Proxy\r\n" +
+        "\r\n",
+    );
+    serverSocket.write(head);
+    serverSocket.pipe(clientSocket);
+    clientSocket.pipe(serverSocket);
   });
 
-  console.log(
-    `Connection from ${remoteAddress}:${remotePort} to ${hostname}:${targetPort}`,
-  );
-
-  proxy.on("error", (err) => {
-    console.error(`Proxy connection error: ${err.message}\n`);
-
-    socket.end();
+  // Handle errors on the client socket
+  clientSocket.on("error", (err) => {
+    console.error(`Error occurred on client socket: ${err.message}`);
   });
 
-  socket.on("error", (err) => {
-    console.error(`Socket error: ${err.message}\n`);
-
-    proxy.end();
-  });
-
-  socket.on("end", () => {
-    console.log(`Connection from ${remoteAddress}:${remotePort} closed\n`);
-
-    proxy.end();
+  // Handle errors on the server socket
+  serverSocket.on("error", (err) => {
+    console.error(`Error occurred on server socket: ${err.message}`);
   });
 });
 
-console.log(`Starting HTTP proxy server on port ${PORT}...`);
-
-server.listen(PORT);
-process.on("SIGTERM", () => {
-  server.close((error) => {
-    if (error) {
-      console.log(error);
-      process.exit(1);
-    }
-  });
+proxy.listen(1337, "127.0.0.1", () => {
+  console.log("Proxy server is running on http://127.0.0.1:1337");
 });
