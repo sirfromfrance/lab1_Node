@@ -1,14 +1,12 @@
 import http from "http";
 import net from "net";
-
+// Create an HTTP tunneling proxy
 const proxy = http.createServer((req, res) => {
-  res.writeHead(200, { "Content-Type": "text/plain", "Proxy-agent": "NodeJS" });
-  res.end(`received a request ${req.url}`);
+  //res.writeHead(200, { "Content-Type": "text/plain", "Proxy-agent": "NodeJS" });
+  //res.end(`received a request ${req.url}`);
 });
 
 proxy.on("request", (req, res) => {
-  // Parse the requested URL
-
   const url = new URL(req.url);
   const options = {
     hostname: url.hostname,
@@ -22,7 +20,8 @@ proxy.on("request", (req, res) => {
   // Create a request to the target server
   const serverReq = http.request(options, (serverRes) => {
     console.log(`Received response from ${url.href}`);
-
+    // Add the custom header
+    //res.setHeader("Proxy-agent", "Node.js-Proxy");
     // Write the response headers
     res.writeHead(serverRes.statusCode, serverRes.headers);
 
@@ -82,6 +81,7 @@ proxy.on("connect", (req, clientSocket, head) => {
   });
 });
 
+// Now that proxy is running
 proxy.listen(1337, "127.0.0.1", () => {
   console.log("Proxy server is running on http://127.0.0.1:1337");
 });
