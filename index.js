@@ -42,13 +42,7 @@ const proxy = http.createServer((req, res) => {
 
 proxy.on("connect", (req, clientSocket, head) => {
   // Check if the URL is empty
-  let url;
-  try {
-    url = new URL(`http://${req.url}`);
-  } catch {
-    console.log(`${req.url} invalid`);
-    return;
-  }
+  const url = new URL(`http://${req.url}`);
 
   // Connect to an origin server
   const { port, hostname } = url;
